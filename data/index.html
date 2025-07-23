@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head><title>DNS Manager</title></head>
+<body>
+  <h1>DNS Entry Manager</h1>
+  <form action="/add" method="POST">
+    Domain: <input type="text" name="domain"><br>
+    IP: <input type="text" name="ip"><br>
+    <input type="submit" value="Add Entry">
+  </form>
+  <form action="/delete" method="POST">
+    Domain: <input type="text" name="domain"><br>
+    <input type="submit" value="Delete Entry">
+  </form>
+  <a href="/list">View Current Entries</a>
+</body>
+</html>
