@@ -13,8 +13,7 @@
       };
       xhr.send();
     }
-
-    setInterval(refreshList, 5000); // Refresh every 5 seconds
+    setInterval(refreshList, 5000);
   </script>
 </head>
 <body onload="refreshList()">
@@ -30,5 +29,13 @@
   </form>
   <h2>Current Entries:</h2>
   <pre id="dnsList">Loading...</pre>
+
+  <h2>Network Configuration</h2>
+  <form action="/setip" method="POST">
+    IP: <input type="text" name="ip"><br>
+    Gateway: <input type="text" name="gateway"><br>
+    Subnet: <input type="text" name="subnet"><br>
+    <input type="submit" value="Update IP Settings">
+  </form>
 </body>
 </html>
