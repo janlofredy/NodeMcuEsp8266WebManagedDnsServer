@@ -5,13 +5,16 @@
 #include <ArduinoJson.h>
 
 const byte DNS_PORT = 53;
-IPAddress local_IP(192, 168, 1, 100); // Static IP
+IPAddress local_IP(192, 168, 1, 100);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
 
 DNSServer dnsServer;
 ESP8266WebServer server(80);
 StaticJsonDocument<1024> dnsDoc;
+
+const char* www_username = "admin";
+const char* www_password = "esp8266";
 
 void saveDNS() {
   File file = SPIFFS.open("/dns.json", "w");
@@ -36,7 +39,7 @@ IPAddress resolveDomain(const String& domain) {
     ip.fromString(dnsDoc[domain].as<String>());
     return ip;
   }
-  return local_IP; // Default fallback
+  return local_IP;
 }
 
 void setup() {
@@ -46,17 +49,20 @@ void setup() {
   WiFi.begin("YOUR_SSID", "YOUR_PASSWORD");
   while (WiFi.status() != WL_CONNECTED) delay(500);
 
-  if (!SPIFFS.begin()) {
-    Serial.println("SPIFFS failed");
-    return;
-  }
-
+  SPIFFS.begin();
   loadDNS();
 
   dnsServer.start(DNS_PORT, "*", local_IP);
-  server.serveStatic("/", SPIFFS, "/index.html");
+
+  server.on("/", HTTP_GET, []() {
+    if (!server.authenticate(www_username, www_password)) return server.requestAuthentication();
+    File file = SPIFFS.open("/index.html", "r");
+    server.streamFile(file, "text/html");
+    file.close();
+  });
 
   server.on("/add", HTTP_POST, []() {
+    if (!server.authenticate(www_username, www_password)) return server.requestAuthentication();
     String domain = server.arg("domain");
     String ip = server.arg("ip");
     dnsDoc[domain] = ip;
@@ -65,6 +71,7 @@ void setup() {
   });
 
   server.on("/delete", HTTP_POST, []() {
+    if (!server.authenticate(www_username, www_password)) return server.requestAuthentication();
     String domain = server.arg("domain");
     dnsDoc.remove(domain);
     saveDNS();
@@ -72,6 +79,7 @@ void setup() {
   });
 
   server.on("/list", HTTP_GET, []() {
+    if (!server.authenticate(www_username, www_password)) return server.requestAuthentication();
     String output;
     serializeJsonPretty(dnsDoc, output);
     server.send(200, "application/json", output);

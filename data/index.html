@@ -1,7 +1,23 @@
 <!DOCTYPE html>
 <html>
-<head><title>DNS Manager</title></head>
-<body>
+<head>
+  <title>DNS Manager</title>
+  <script>
+    function refreshList() {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", "/list", true);
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          document.getElementById("dnsList").textContent = xhr.responseText;
+        }
+      };
+      xhr.send();
+    }
+
+    setInterval(refreshList, 5000); // Refresh every 5 seconds
+  </script>
+</head>
+<body onload="refreshList()">
   <h1>DNS Entry Manager</h1>
   <form action="/add" method="POST">
     Domain: <input type="text" name="domain"><br>
@@ -12,6 +28,7 @@
     Domain: <input type="text" name="domain"><br>
     <input type="submit" value="Delete Entry">
   </form>
-  <a href="/list">View Current Entries</a>
+  <h2>Current Entries:</h2>
+  <pre id="dnsList">Loading...</pre>
 </body>
 </html>
